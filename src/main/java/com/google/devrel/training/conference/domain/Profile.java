@@ -13,7 +13,7 @@ public class Profile {
 	TeeShirtSize teeShirtSize;
 
 	// TODO indicate that the userId is to be used in the Entity's key
-	String userId;
+	@Id String userId;
     
     /**
      * Public constructor for Profile.
@@ -38,12 +38,19 @@ public class Profile {
 		return mainEmail;
 	}
 
+	
 	public TeeShirtSize getTeeShirtSize() {
 		return teeShirtSize;
 	}
 
 	public String getUserId() {
 		return userId;
+	}
+	
+	public void update(String displayName, TeeShirtSize teeShirtSize) {
+		this.displayName = displayName;
+		// this.teeShirtSize = teeShirtSize;
+		this.teeShirtSize = TeeShirtSize.L;  // !!!! to break a single test in each test suite
 	}
 
 	/**

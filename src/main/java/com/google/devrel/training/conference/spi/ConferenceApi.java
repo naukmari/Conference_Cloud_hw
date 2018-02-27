@@ -48,8 +48,7 @@ public class ConferenceApi {
 
     // TODO 1 Pass the ProfileForm parameter
     // TODO 2 Pass the User parameter
-    public Profile saveProfile(ProfileForm profileForm, User user) throws UnauthorizedException {
-
+    public Profile saveProfile(User user, ProfileForm profileForm) throws UnauthorizedException {
         String userId = null;
         String mainEmail = null;
         String displayName = "Your name will go here";
@@ -65,6 +64,9 @@ public class ConferenceApi {
         // Set the teeShirtSize to the value sent by the ProfileForm, if sent
         // otherwise leave it as the default value
 		teeShirtSize = profileForm.getTeeShirtSize();
+		if (teeShirtSize == null) {
+			teeShirtSize = TeeShirtSize.NOT_SPECIFIED;
+		}
 
         // TODO 1
         // Set the displayName to the value sent by the ProfileForm, if sent
@@ -86,10 +88,19 @@ public class ConferenceApi {
 
         // Create a new Profile entity from the
         // userId, displayName, mainEmail and teeShirtSize
-        Profile profile = new Profile(userId, displayName, mainEmail, teeShirtSize);
+        // Profile profile = new Profile(userId, displayName, mainEmail, teeShirtSize);
+		Profile profile = getProfile(user);
+		if (profile == null) {
+			profile = new Profile(userId, displayName, mainEmail, teeShirtSize);
+		} else {
+			if (profileForm.getDisplayName() == null)
+				displayName = profile.getDisplayName();
+			profile.update(displayName, teeShirtSize);
+		}
 
         // TODO 3 (In Lesson 3)
         // Save the Profile entity in the datastore
+		ofy().save().entity(profile).now();
 
         // Return the profile
         return profile;
@@ -113,9 +124,9 @@ public class ConferenceApi {
 
         // TODO
         // load the Profile Entity
-        String userId = ""; // TODO
-        Key key = null; // TODO
-        Profile profile = null; // TODO load the Profile entity
+        String userId = user.getUserId(); // TODO
+        Key key = Key.create(Profile.class,userId); // TODO
+        Profile profile = (Profile)ofy().load().key(key).now(); // TODO load the Profile entity
         return profile;
     }
 }
