@@ -69,7 +69,7 @@ public class Conference {
     /**
      * The name of the city that the conference takes place.
      */
-    @Index(IfNotDefault.class) private String city;
+    @Index(IfNotDefault.class) private String city = DEFAULT_CITY;
 
     /**
      * The starting date of this conference.
