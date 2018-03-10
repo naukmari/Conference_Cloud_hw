@@ -1,6 +1,7 @@
 package com.google.devrel.training.conference.service;
 
 import com.google.devrel.training.conference.domain.Profile;
+import com.google.devrel.training.conference.domain.Conference;
 import com.googlecode.objectify.Objectify;
 import com.googlecode.objectify.ObjectifyFactory;
 import com.googlecode.objectify.ObjectifyService;
@@ -14,7 +15,9 @@ public class OfyService {
      */
     static {
         factory().register(Profile.class);
+        factory().register(Conference.class);
     }
+    
 
     /**
      * Use this static method for getting the Objectify service object in order to make sure the
