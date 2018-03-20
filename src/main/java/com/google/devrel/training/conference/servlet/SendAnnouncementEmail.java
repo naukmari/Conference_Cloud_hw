@@ -35,11 +35,23 @@ public class SendAnnouncementEmail extends HttpServlet {
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
+		Iterable<Conference> iterable = ofy().load().type(Conference.class).filter("seatsAvailable <", 5)
+				.filter("seatsAvailable >", 0);
+		List<String> conferenceNames = new ArrayList<>(0);
+		for (Conference conference : iterable) {
+			conferenceNames.add(conference.getName());
+		}
+		if (conferenceNames.size() > 0) {
+			// Build a String that announces the nearly sold-out conferences
+			StringBuilder announcementStringBuilder = new StringBuilder(
+					"Last chance to attend! The following conferences are nearly sold out: ");
+			Joiner joiner = Joiner.on(", ").skipNulls();
+			announcementStringBuilder.append(joiner.join(conferenceNames));
 		String email = "naukmari@gmail.com";
         // String conferenceInfo = request.getParameter("conferenceInfo");
         Properties props = new Properties();
         Session session = Session.getDefaultInstance(props, null);
-        String body = "Test email.\n";
+        String body = announcementStringBuilder.toString();
         try {
             Message message = new MimeMessage(session);
             InternetAddress from = new InternetAddress(
@@ -47,7 +59,7 @@ public class SendAnnouncementEmail extends HttpServlet {
                             SystemProperty.applicationId.get()), "Conference Central");
             message.setFrom(from);
             message.addRecipient(Message.RecipientType.TO, new InternetAddress(email, ""));
-            message.setSubject("Test email!!!1");
+            message.setSubject("Last chance!!!");
             message.setText(body);
             Transport.send(message);
         } catch (MessagingException e) {
@@ -57,53 +69,56 @@ public class SendAnnouncementEmail extends HttpServlet {
 		
 		response.setStatus(204);
 	}
-	
+	}
+
 	@Override
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-		
-		
+
 		response.setStatus(404);
-//		
-//		String email = request.getParameter("email");
-//		String conferenceInfo = request.getParameter("conferenceInfo");
-//		// TODO
-//		// Query for conferences with less than 5 seats left
-//		Iterable<Conference> iterable = ofy().load().type(Conference.class).filter("seatsAvailable <", 5)
-//				.filter("seatsAvailable >", 0);
-//
-//		// TODO
-//		// Iterate over the conferences with less than 5 seats less
-//		// and get the name of each one
-//		List<String> conferenceNames = new ArrayList<>(0);
-//		for (Conference conference : iterable) {
-//			conferenceNames.add(conference.getName());
-//		}
-//		if (conferenceNames.size() > 0) {
-//
-//			// Build a String that announces the nearly sold-out conferences
-//			StringBuilder announcementStringBuilder = new StringBuilder(
-//					"Last chance to attend! The following conferences are nearly sold out: ");
-//			Joiner joiner = Joiner.on(", ").skipNulls();
-//			announcementStringBuilder.append(joiner.join(conferenceNames));
-//
-//			Properties props = new Properties();
-//			Session session = Session.getDefaultInstance(props, null);
-//			String body = announcementStringBuilder + "\n";
-//			try {
-//				Message message = new MimeMessage(session);
-//				InternetAddress from = new InternetAddress(
-//						String.format("noreply@%s.appspotmail.com", SystemProperty.applicationId.get()),
-//						"Conference Central");
-//				message.setFrom(from);
-//				message.addRecipient(Message.RecipientType.TO, new InternetAddress(email, ""));
-//				message.setSubject("Hello! Don't forget to take part!");
-//				message.setText(body);
-//				Transport.send(message);
-//			} catch (MessagingException e) {
-//				LOG.log(Level.WARNING, String.format("Failed to send an mail to %s", email), e);
-//				throw new RuntimeException(e);
-//			}
-//		}
+		//
+
+		// // TODO
+		// // Query for conferences with less than 5 seats left
+		// Iterable<Conference> iterable =
+		// ofy().load().type(Conference.class).filter("seatsAvailable <", 5)
+		// .filter("seatsAvailable >", 0);
+		//
+		// // TODO
+		// // Iterate over the conferences with less than 5 seats less
+		// // and get the name of each one
+		// List<String> conferenceNames = new ArrayList<>(0);
+		// for (Conference conference : iterable) {
+		// conferenceNames.add(conference.getName());
+		// }
+		// if (conferenceNames.size() > 0) {
+		//
+		// // Build a String that announces the nearly sold-out conferences
+		// StringBuilder announcementStringBuilder = new StringBuilder(
+		// "Last chance to attend! The following conferences are nearly sold out: ");
+		// Joiner joiner = Joiner.on(", ").skipNulls();
+		// announcementStringBuilder.append(joiner.join(conferenceNames));
+		//
+		// Properties props = new Properties();
+		// Session session = Session.getDefaultInstance(props, null);
+		// String body = announcementStringBuilder + "\n";
+		// try {
+		// Message message = new MimeMessage(session);
+		// InternetAddress from = new InternetAddress(
+		// String.format("noreply@%s.appspotmail.com",
+		// SystemProperty.applicationId.get()),
+		// "Conference Central");
+		// message.setFrom(from);
+		// message.addRecipient(Message.RecipientType.TO, new InternetAddress(email,
+		// ""));
+		// message.setSubject("Hello! Don't forget to take part!");
+		// message.setText(body);
+		// Transport.send(message);
+		// } catch (MessagingException e) {
+		// LOG.log(Level.WARNING, String.format("Failed to send an mail to %s", email),
+		// e);
+		// throw new RuntimeException(e);
+		// }
+		// }
 	}
 }
