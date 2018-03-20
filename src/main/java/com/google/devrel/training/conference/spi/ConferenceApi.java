@@ -10,6 +10,9 @@ import com.google.api.server.spi.response.ConflictException;
 import com.google.api.server.spi.response.ForbiddenException;
 import com.google.api.server.spi.response.NotFoundException;
 import com.google.api.server.spi.response.UnauthorizedException;
+import com.google.appengine.api.memcache.MemcacheService;
+import com.google.appengine.api.memcache.MemcacheServiceFactory;
+
 import com.google.appengine.api.users.User;
 import com.google.devrel.training.conference.Constants;
 import com.google.devrel.training.conference.domain.Profile;
@@ -18,13 +21,20 @@ import com.google.devrel.training.conference.form.ProfileForm.TeeShirtSize;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.Work;
 import com.google.devrel.training.conference.form.ConferenceForm;
+import com.google.devrel.training.conference.domain.Announcement;
 import com.google.devrel.training.conference.domain.Conference;
 import com.google.devrel.training.conference.service.OfyService;
 import java.util.List;
+
+
 import com.googlecode.objectify.cmd.Query;
 import com.google.devrel.training.conference.form.ConferenceQueryForm;
 import java.util.ArrayList;
 import java.util.Collection;
+
+import com.google.appengine.api.taskqueue.Queue;
+import com.google.appengine.api.taskqueue.QueueFactory;
+import com.google.appengine.api.taskqueue.TaskOptions;
 
 /**
  * Defines conference APIs.
@@ -199,6 +209,7 @@ public class ConferenceApi {
 		// TODO (Lesson 4)
 		// Get the Conference Id from the Key
 		final long conferenceId = conferenceKey.getId();
+		Queue queue = QueueFactory.getDefaultQueue(); 
 
 		// TODO (Lesson 4)
 		// Get the existing Profile entity for the current user if there is one
@@ -214,6 +225,9 @@ public class ConferenceApi {
 		// Save Conference and Profile Entities
 
 		ofy().save().entities(conference, profile).now();
+		
+		queue.add(TaskOptions.Builder.withUrl("/email-queue").param("email", profile.getMainEmail()).param("conferenceInfo", conference.toString()));
+		//queue.add(TaskOptions.Builder.withUrl("/crons/set_announcemen").param("email", profile.getMainEmail()).param("conferenceInfo", conference.toString()));
 		return conference;
 	}
 
@@ -512,4 +526,22 @@ public class ConferenceApi {
 		}
 		return result;
 	}
+	
+	@ApiMethod(
+		    name="getAnnouncement",
+		    path = "announcement",
+		    httpMethod = HttpMethod.GET
+		    )
+		    public Announcement getAnnouncement(){
+		    //TODO GET announcement from memcache by key and if it exist return it
+			MemcacheService memcacheService = MemcacheServiceFactory.getMemcacheService();
+			String announcementKey = Constants.MEMCACHE_ANNOUNCEMENTS_KEY;
+			Object obj = memcacheService.get(announcementKey);
+			if(obj != null){
+				return new Announcement(obj.toString());
+			}
+		    return null;
+		    }
 }
+
+

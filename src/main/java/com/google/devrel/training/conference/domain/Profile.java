@@ -7,9 +7,12 @@ import com.google.appengine.repackaged.com.google.common.collect.ImmutableList;
 import com.google.devrel.training.conference.form.ProfileForm.TeeShirtSize;
 import com.googlecode.objectify.annotation.Entity;
 import com.googlecode.objectify.annotation.Id;
+import com.googlecode.objectify.annotation.Cache;
 
 // TODO indicate that this class is an Entity
+
 @Entity
+@Cache
 public class Profile {
 	private List<String> conferenceKeysToAttend = new ArrayList<>(0);
 	String displayName;
